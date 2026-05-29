@@ -295,14 +295,55 @@
   .congrats-title { font-size: 24px; font-weight: 800; color: var(--success); margin-bottom: 8px; }
   .congrats-sub { font-size: 15px; color: var(--text-soft); }
 
-  /* Template structure visual */
-  .folder-tree {
-    font-family: 'JetBrains Mono', monospace; font-size: 13px;
-    line-height: 2; color: #cdd6f4; padding: 4px 0;
+  /* ── FOLDER TREE V2 ── */
+  .vault-root {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
   }
-  .folder-tree .folder { color: #89b4fa; }
-  .folder-tree .file { color: #a6e3a1; }
-  .folder-tree .desc { color: #6c7086; }
+  .vault-root-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(124,106,247,.1), rgba(79,209,199,.06));
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 700; color: var(--text);
+  }
+  .vault-root-header span { font-size: 20px; }
+
+  .folder-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .15s;
+  }
+  .folder-item:last-child { border-bottom: none; }
+  .folder-item:hover { background: rgba(255,255,255,.02); }
+
+  .folder-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0; margin-top: 2px;
+  }
+
+  .folder-info { flex: 1; min-width: 0; }
+  .folder-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 700; color: #89b4fa;
+    margin-bottom: 3px;
+  }
+  .folder-desc {
+    font-size: 13px; color: var(--text-muted); line-height: 1.5;
+  }
+  .folder-files {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+  }
+  .folder-file-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(166,227,161,.07); border: 1px solid rgba(166,227,161,.15);
+    color: #a6e3a1; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; padding: 3px 10px; border-radius: 6px;
+  }
+  .folder-file-tag::before { content: '📄'; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -454,43 +495,106 @@
     <div class="step-body" id="body-3">
       <p class="intro-text">Một cấu trúc rõ ràng giúp cả team tìm tài liệu nhanh, không lạc lối. Đây là template đã được tối ưu cho startup giai đoạn đầu.</p>
 
-      <div class="code-block">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<div class="folder-tree">
-📁 <span class="folder">startup-tên-dự-án/</span>
-│
-├── 📁 <span class="folder">00-MOC/</span>                   <span class="desc">← Maps of Content (trang mục lục)</span>
-│   └── 📄 <span class="file">🏠 Home.md</span>              <span class="desc">← trang chủ vault</span>
-│
-├── 📁 <span class="folder">01-Ideas/</span>                  <span class="desc">← ý tưởng thô, brainstorm</span>
-│   ├── 📄 <span class="file">Problem Statement.md</span>
-│   └── 📄 <span class="file">Solution Ideas.md</span>
-│
-├── 📁 <span class="folder">02-Research/</span>               <span class="desc">← nghiên cứu thị trường, đối thủ</span>
-│   ├── 📄 <span class="file">Market Analysis.md</span>
-│   ├── 📄 <span class="file">Competitor Map.md</span>
-│   └── 📄 <span class="file">User Interviews/</span>
-│
-├── 📁 <span class="folder">03-Product/</span>                <span class="desc">← định nghĩa sản phẩm</span>
-│   ├── 📄 <span class="file">MVP Scope.md</span>
-│   ├── 📄 <span class="file">User Stories.md</span>
-│   └── 📄 <span class="file">Roadmap.md</span>
-│
-├── 📁 <span class="folder">04-Business/</span>               <span class="desc">← mô hình kinh doanh</span>
-│   ├── 📄 <span class="file">Business Model Canvas.md</span>
-│   └── 📄 <span class="file">Financial Plan.md</span>
-│
-├── 📁 <span class="folder">05-Team/</span>                   <span class="desc">← con người & quy trình</span>
-│   ├── 📄 <span class="file">Team Members.md</span>
-│   └── 📄 <span class="file">Meeting Notes/</span>
-│
-├── 📁 <span class="folder">06-Pitch/</span>                  <span class="desc">← tài liệu thuyết trình</span>
-│   ├── 📄 <span class="file">Pitch Deck Outline.md</span>
-│   └── 📄 <span class="file">QA Preparation.md</span>
-│
-└── 📁 <span class="folder">07-Resources/</span>              <span class="desc">← tài liệu tham khảo</span>
-    └── 📄 <span class="file">Useful Links.md</span>
-</div>
+      <div class="vault-root">
+        <div class="vault-root-header">
+          <span>🗄️</span> startup-tên-dự-án/
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(124,106,247,.15)">🏠</div>
+          <div class="folder-info">
+            <div class="folder-name">00-MOC/</div>
+            <div class="folder-desc">Maps of Content — trang mục lục tổng hợp, nơi điều hướng toàn bộ vault</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Home.md</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(249,226,175,.12)">💡</div>
+          <div class="folder-info">
+            <div class="folder-name">01-Ideas/</div>
+            <div class="folder-desc">Ý tưởng thô, brainstorm — ghi lại mọi thứ, lọc sau</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Problem Statement.md</span>
+              <span class="folder-file-tag">Solution Ideas.md</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(137,180,250,.12)">🔍</div>
+          <div class="folder-info">
+            <div class="folder-name">02-Research/</div>
+            <div class="folder-desc">Nghiên cứu thị trường, phân tích đối thủ, phỏng vấn người dùng</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Market Analysis.md</span>
+              <span class="folder-file-tag">Competitor Map.md</span>
+              <span class="folder-file-tag">User Interviews/</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(79,209,199,.12)">🛠️</div>
+          <div class="folder-info">
+            <div class="folder-name">03-Product/</div>
+            <div class="folder-desc">Định nghĩa sản phẩm — scope MVP, user stories, lộ trình phát triển</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">MVP Scope.md</span>
+              <span class="folder-file-tag">User Stories.md</span>
+              <span class="folder-file-tag">Roadmap.md</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(166,227,161,.12)">💰</div>
+          <div class="folder-info">
+            <div class="folder-name">04-Business/</div>
+            <div class="folder-desc">Mô hình kinh doanh, kế hoạch tài chính</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Business Model Canvas.md</span>
+              <span class="folder-file-tag">Financial Plan.md</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(243,139,168,.12)">👥</div>
+          <div class="folder-info">
+            <div class="folder-name">05-Team/</div>
+            <div class="folder-desc">Con người, phân công, biên bản cuộc họp</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Team Members.md</span>
+              <span class="folder-file-tag">Meeting Notes/</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(246,173,85,.12)">🎤</div>
+          <div class="folder-info">
+            <div class="folder-name">06-Pitch/</div>
+            <div class="folder-desc">Tài liệu thuyết trình, chuẩn bị gặp nhà đầu tư</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Pitch Deck Outline.md</span>
+              <span class="folder-file-tag">QA Preparation.md</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="folder-item">
+          <div class="folder-icon" style="background:rgba(137,220,235,.12)">📚</div>
+          <div class="folder-info">
+            <div class="folder-name">07-Resources/</div>
+            <div class="folder-desc">Tài liệu tham khảo, link hữu ích</div>
+            <div class="folder-files">
+              <span class="folder-file-tag">Useful Links.md</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <ul class="task-list" id="tasks-3">
