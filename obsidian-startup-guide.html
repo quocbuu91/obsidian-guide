@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obsidian cho Startup — Hướng dẫn từng bước</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --surface: #111318;
+    --surface2: #181b23;
+    --border: #252932;
+    --accent: #7c6af7;
+    --accent2: #4fd1c7;
+    --accent3: #f6ad55;
+    --text: #e2e5ef;
+    --text-muted: #6b7280;
+    --text-soft: #9ca3af;
+    --success: #34d399;
+    --danger: #f87171;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% -10%, rgba(124,106,247,.35) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 60%, rgba(79,209,199,.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,106,247,.15);
+    border: 1px solid rgba(124,106,247,.35);
+    color: #a78bfa;
+    font-size: 12px; font-weight: 600; letter-spacing: .08em;
+    padding: 6px 16px; border-radius: 99px;
+    margin-bottom: 28px; text-transform: uppercase;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa 70%, #4fd1c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+  .subtitle {
+    font-size: 17px; color: var(--text-soft); max-width: 560px; margin: 0 auto 40px; line-height: 1.7;
+  }
+
+  .stats-row {
+    display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .06em; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,11,15,.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  .progress-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+  .progress-bar-track {
+    flex: 1; height: 4px; border-radius: 99px; background: var(--border);
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease;
+  }
+  .progress-label { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .step-card.active {
+    border-color: rgba(124,106,247,.5);
+    box-shadow: 0 0 0 1px rgba(124,106,247,.15), 0 20px 60px rgba(0,0,0,.4);
+  }
+  .step-card.done { border-color: rgba(52,211,153,.3); }
+
+  .step-header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 22px 28px; cursor: pointer; user-select: none;
+    transition: background .2s;
+  }
+  .step-header:hover { background: rgba(255,255,255,.02); }
+
+  .step-num {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    color: var(--text-muted);
+    transition: all .3s;
+  }
+  .step-card.active .step-num {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+    box-shadow: 0 0 20px rgba(124,106,247,.5);
+  }
+  .step-card.done .step-num {
+    background: var(--success); border-color: var(--success); color: #fff;
+  }
+  .step-card.done .step-num::after { content: '✓'; position: absolute; }
+
+  .step-title-wrap { flex: 1; }
+  .step-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--accent); margin-bottom: 4px;
+  }
+  .step-card.done .step-tag { color: var(--success); }
+  .step-title { font-size: 18px; font-weight: 700; line-height: 1.3; }
+
+  .step-toggle {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; flex-shrink: 0;
+  }
+  .step-toggle:hover { background: var(--surface2); color: var(--text); }
+  .step-toggle.open { transform: rotate(180deg); }
+
+  .step-body {
+    padding: 0 28px 28px;
+    display: none;
+    animation: slideDown .3s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .step-body.open { display: block; }
+
+  /* ── CONTENT STYLES ── */
+  .intro-text {
+    font-size: 15px; color: var(--text-soft); line-height: 1.8;
+    margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+  }
+
+  .task-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    background: var(--surface2); border: 1px solid transparent;
+    cursor: pointer; transition: all .2s;
+  }
+  .task-item:hover { border-color: var(--border); }
+  .task-item.checked { background: rgba(52,211,153,.06); border-color: rgba(52,211,153,.2); }
+  .task-check {
+    width: 20px; height: 20px; border-radius: 6px;
+    border: 2px solid var(--border); flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; font-size: 12px;
+  }
+  .task-item.checked .task-check { background: var(--success); border-color: var(--success); color: #fff; }
+  .task-text { font-size: 14px; line-height: 1.6; color: var(--text-soft); }
+  .task-item.checked .task-text { color: var(--text-muted); text-decoration: line-through; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #0d0f14; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: #cdd6f4; line-height: 1.8; overflow-x: auto; margin: 16px 0;
+    position: relative;
+  }
+  .code-block .comment { color: #6c7086; }
+  .code-block .tag { color: #89b4fa; }
+  .code-block .value { color: #a6e3a1; }
+  .code-block .link { color: #f9e2af; }
+  .copy-btn {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text-muted); font-size: 11px; padding: 4px 10px;
+    border-radius: 6px; cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ── TIP BOXES ── */
+  .tip-box {
+    border-radius: var(--radius-sm); padding: 16px 18px;
+    margin: 16px 0; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .tip-box.info { background: rgba(124,106,247,.08); border: 1px solid rgba(124,106,247,.2); }
+  .tip-box.warn { background: rgba(246,173,85,.08); border: 1px solid rgba(246,173,85,.2); }
+  .tip-box.success { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.2); }
+  .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 14px; line-height: 1.7; color: var(--text-soft); }
+  .tip-text strong { color: var(--text); }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  @media(max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .mini-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px;
+  }
+  .mini-card-icon { font-size: 24px; margin-bottom: 8px; }
+  .mini-card-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mini-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── SHORTCUT TABLE ── */
+  .shortcut-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .shortcut-row:last-child { border-bottom: none; }
+  .shortcut-desc { font-size: 14px; color: var(--text-soft); }
+  .kbd-group { display: flex; gap: 4px; }
+  kbd {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-bottom: 3px solid #1e2130;
+    border-radius: 6px; padding: 3px 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--text);
+  }
+
+  /* ── DONE BUTTON ── */
+  .done-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 24px; width: 100%;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 14px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .done-btn:hover { background: #6d5ce7; transform: translateY(-1px); }
+  .done-btn.undone { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+  .done-btn.undone:hover { color: var(--text); }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; padding: 40px 24px;
+    color: var(--text-muted); font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── CONGRATS ── */
+  .congrats-banner {
+    background: linear-gradient(135deg, rgba(52,211,153,.12), rgba(124,106,247,.12));
+    border: 1px solid rgba(52,211,153,.3);
+    border-radius: var(--radius); padding: 32px;
+    text-align: center; margin-bottom: 24px; display: none;
+  }
+  .congrats-banner.show { display: block; animation: slideDown .5s ease; }
+  .congrats-emoji { font-size: 48px; margin-bottom: 12px; }
+  .congrats-title { font-size: 24px; font-weight: 800; color: var(--success); margin-bottom: 8px; }
+  .congrats-sub { font-size: 15px; color: var(--text-soft); }
+
+  /* Template structure visual */
+  .folder-tree {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    line-height: 2; color: #cdd6f4; padding: 4px 0;
+  }
+  .folder-tree .folder { color: #89b4fa; }
+  .folder-tree .file { color: #a6e3a1; }
+  .folder-tree .desc { color: #6c7086; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge"><span class="dot"></span> Hướng dẫn thực chiến</div>
+  <h1>Obsidian cho Startup<br>Quản lý ý tưởng như Pro</h1>
+  <p class="subtitle">Từng bước được thiết kế dành riêng cho sinh viên — từ cài đặt đến xây dựng hệ thống tài liệu startup hoàn chỉnh.</p>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">Bước học</div></div>
+    <div class="stat"><div class="stat-num">~2h</div><div class="stat-label">Hoàn thành</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Miễn phí</div></div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <span class="progress-label" id="progressLabel">0 / 7 bước</span>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="congrats-banner" id="congratsBanner">
+    <div class="congrats-emoji">🚀</div>
+    <div class="congrats-title">Xuất sắc! Bạn đã hoàn thành!</div>
+    <div class="congrats-sub">Hệ thống Obsidian startup của bạn đã sẵn sàng. Hãy bắt đầu ghi lại ý tưởng đầu tiên!</div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card active" id="step-1">
+    <div class="step-header" onclick="toggleStep(1)">
+      <div class="step-num">1</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 1 · Khởi đầu</div>
+        <div class="step-title">Tải & Cài đặt Obsidian</div>
+      </div>
+      <button class="step-toggle open" id="toggle-1">▾</button>
+    </div>
+    <div class="step-body open" id="body-1">
+      <p class="intro-text">Obsidian là công cụ ghi chú cục bộ (local-first) — dữ liệu lưu trên máy bạn, không phụ thuộc đám mây. Hoàn toàn miễn phí cho cá nhân.</p>
+
+      <ul class="task-list" id="tasks-1">
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Truy cập <strong>obsidian.md</strong> → nhấn <em>Download</em> → chọn phiên bản phù hợp (Windows / macOS / Linux)</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Cài đặt ứng dụng và mở lần đầu tiên</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Chọn <strong>Create new vault</strong> khi được hỏi</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Đặt tên vault: <code style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-family:monospace;color:#a6e3a1">startup-[tên-dự-án]</code> và chọn thư mục lưu trữ</div>
+        </li>
+      </ul>
+
+      <div class="tip-box info">
+        <div class="tip-icon">💡</div>
+        <div class="tip-text"><strong>Vault là gì?</strong> Vault = kho tài liệu. Mỗi vault là một thư mục trên máy tính. Bạn có thể có nhiều vault cho nhiều dự án khác nhau.</div>
+      </div>
+
+      <div class="tip-box warn">
+        <div class="tip-icon">⚠️</div>
+        <div class="tip-text"><strong>Lưu ý:</strong> Đặt vault trong Google Drive / OneDrive nếu muốn tự động sao lưu lên đám mây — không cần phải trả phí Obsidian Sync.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(1)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card" id="step-2">
+    <div class="step-header" onclick="toggleStep(2)">
+      <div class="step-num">2</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 2 · Nền tảng</div>
+        <div class="step-title">Hiểu giao diện & Markdown cơ bản</div>
+      </div>
+      <button class="step-toggle" id="toggle-2">▾</button>
+    </div>
+    <div class="step-body" id="body-2">
+      <p class="intro-text">Obsidian dùng ngôn ngữ Markdown — cực kỳ đơn giản, bạn sẽ thành thạo trong 10 phút.</p>
+
+      <div class="grid-2">
+        <div class="mini-card">
+          <div class="mini-card-icon">📝</div>
+          <div class="mini-card-title">Editor (giữa)</div>
+          <div class="mini-card-desc">Nơi bạn viết ghi chú. Nhấn Ctrl+E để chuyển giữa chế độ Edit và Preview.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🗂️</div>
+          <div class="mini-card-title">File Explorer (trái)</div>
+          <div class="mini-card-desc">Cây thư mục dự án. Kéo thả file để sắp xếp, click phải để tạo folder mới.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🔗</div>
+          <div class="mini-card-title">Graph View (Ctrl+G)</div>
+          <div class="mini-card-desc">Xem bản đồ liên kết giữa các ghi chú — điểm độc đáo nhất của Obsidian.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🔍</div>
+          <div class="mini-card-title">Quick Switch (Ctrl+O)</div>
+          <div class="mini-card-desc">Mở nhanh bất kỳ file nào bằng tên — cực kỳ hữu ích khi vault lớn.</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin:20px 0 12px;color:var(--text)">Markdown cần nhớ ngay:</p>
+      <div class="code-block">
+<span class="comment"># Tiêu đề lớn (H1)</span>
+<span class="comment">## Tiêu đề vừa (H2)</span>
+<span class="comment">### Tiêu đề nhỏ (H3)</span>
+
+<span class="value">**in đậm**</span>    <span class="link">*in nghiêng*</span>    <span class="tag">~~gạch ngang~~</span>
+
+- Danh sách không thứ tự
+- [ ] Checkbox chưa làm
+- [x] Checkbox đã xong
+
+<span class="tag">[[Tên ghi chú]]</span>   <span class="comment">← liên kết nội bộ (quan trọng nhất!)</span>
+<span class="link">#tag-nhãn</span>          <span class="comment">← gắn thẻ để tìm kiếm</span>
+      </div>
+
+      <div class="tip-box success">
+        <div class="tip-icon">🎯</div>
+        <div class="tip-text"><strong>Thực hành ngay:</strong> Tạo file mới (Ctrl+N), thử gõ các cú pháp trên, nhấn Ctrl+E để xem kết quả render.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(2)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card" id="step-3">
+    <div class="step-header" onclick="toggleStep(3)">
+      <div class="step-num">3</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 3 · Cấu trúc</div>
+        <div class="step-title">Xây dựng cấu trúc thư mục cho Startup</div>
+      </div>
+      <button class="step-toggle" id="toggle-3">▾</button>
+    </div>
+    <div class="step-body" id="body-3">
+      <p class="intro-text">Một cấu trúc rõ ràng giúp cả team tìm tài liệu nhanh, không lạc lối. Đây là template đã được tối ưu cho startup giai đoạn đầu.</p>
+
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<div class="folder-tree">
+📁 <span class="folder">startup-tên-dự-án/</span>
+│
+├── 📁 <span class="folder">00-MOC/</span>                   <span class="desc">← Maps of Content (trang mục lục)</span>
+│   └── 📄 <span class="file">🏠 Home.md</span>              <span class="desc">← trang chủ vault</span>
+│
+├── 📁 <span class="folder">01-Ideas/</span>                  <span class="desc">← ý tưởng thô, brainstorm</span>
+│   ├── 📄 <span class="file">Problem Statement.md</span>
+│   └── 📄 <span class="file">Solution Ideas.md</span>
+│
+├── 📁 <span class="folder">02-Research/</span>               <span class="desc">← nghiên cứu thị trường, đối thủ</span>
+│   ├── 📄 <span class="file">Market Analysis.md</span>
+│   ├── 📄 <span class="file">Competitor Map.md</span>
+│   └── 📄 <span class="file">User Interviews/</span>
+│
+├── 📁 <span class="folder">03-Product/</span>                <span class="desc">← định nghĩa sản phẩm</span>
+│   ├── 📄 <span class="file">MVP Scope.md</span>
+│   ├── 📄 <span class="file">User Stories.md</span>
+│   └── 📄 <span class="file">Roadmap.md</span>
+│
+├── 📁 <span class="folder">04-Business/</span>               <span class="desc">← mô hình kinh doanh</span>
+│   ├── 📄 <span class="file">Business Model Canvas.md</span>
+│   └── 📄 <span class="file">Financial Plan.md</span>
+│
+├── 📁 <span class="folder">05-Team/</span>                   <span class="desc">← con người & quy trình</span>
+│   ├── 📄 <span class="file">Team Members.md</span>
+│   └── 📄 <span class="file">Meeting Notes/</span>
+│
+├── 📁 <span class="folder">06-Pitch/</span>                  <span class="desc">← tài liệu thuyết trình</span>
+│   ├── 📄 <span class="file">Pitch Deck Outline.md</span>
+│   └── 📄 <span class="file">QA Preparation.md</span>
+│
+└── 📁 <span class="folder">07-Resources/</span>              <span class="desc">← tài liệu tham khảo</span>
+    └── 📄 <span class="file">Useful Links.md</span>
+</div>
+      </div>
+
+      <ul class="task-list" id="tasks-3">
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Tạo các thư mục trên trong File Explorer (click chuột phải → New folder)</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Tạo file <strong>Home.md</strong> trong thư mục 00-MOC</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Trong Home.md, tạo danh sách liên kết đến tất cả các thư mục (dùng <code style="font-family:monospace">[[tên file]]</code>)</div>
+        </li>
+      </ul>
+
+      <div class="tip-box info">
+        <div class="tip-icon">💡</div>
+        <div class="tip-text"><strong>Quy tắc đặt số thứ tự (00, 01...):</strong> Giúp thư mục luôn sắp xếp theo đúng thứ tự ưu tiên trong File Explorer, không bị xáo trộn theo alphabet.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(3)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card" id="step-4">
+    <div class="step-header" onclick="toggleStep(4)">
+      <div class="step-num">4</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 4 · Liên kết</div>
+        <div class="step-title">Dùng Internal Links & Tags để kết nối ý tưởng</div>
+      </div>
+      <button class="step-toggle" id="toggle-4">▾</button>
+    </div>
+    <div class="step-body" id="body-4">
+      <p class="intro-text">Đây là sức mạnh thực sự của Obsidian — mọi ý tưởng đều có thể liên kết với nhau, tạo thành mạng lưới kiến thức sống động.</p>
+
+      <p style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)">Cách dùng Internal Link [[...]]:</p>
+      <div class="code-block">
+<span class="comment"># Problem Statement</span>
+
+Khách hàng của chúng ta (xem [[User Interviews/User-01]]) phản ánh rằng
+việc quản lý đơn hàng thủ công tốn quá nhiều thời gian.
+
+<span class="comment">## Giải pháp tiềm năng</span>
+- Xem thêm ý tưởng trong [[Solution Ideas]]
+- Đối thủ đã làm gì? → [[Competitor Map]]
+
+<span class="comment">## Tags liên quan</span>
+<span class="link">#pain-point  #ưu-tiên-cao  #đã-validate</span>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin:20px 0 12px;color:var(--text)">Hệ thống Tags nên dùng cho Startup:</p>
+      <div class="grid-2">
+        <div class="mini-card">
+          <div class="mini-card-title" style="color:var(--accent)">#trạng-thái</div>
+          <div class="mini-card-desc" style="margin-top:8px">
+            <code style="font-family:monospace;color:#a6e3a1">#idea</code> → mới nảy ra<br>
+            <code style="font-family:monospace;color:#f9e2af">#in-progress</code> → đang làm<br>
+            <code style="font-family:monospace;color:#89dceb">#đã-validate</code> → đã kiểm chứng<br>
+            <code style="font-family:monospace;color:#f38ba8">#đã-loại</code> → không dùng
+          </div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-title" style="color:var(--accent2)">#lĩnh-vực</div>
+          <div class="mini-card-desc" style="margin-top:8px">
+            <code style="font-family:monospace;color:#a6e3a1">#product</code><br>
+            <code style="font-family:monospace;color:#a6e3a1">#marketing</code><br>
+            <code style="font-family:monospace;color:#a6e3a1">#finance</code><br>
+            <code style="font-family:monospace;color:#a6e3a1">#user-research</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box success">
+        <div class="tip-icon">🗺️</div>
+        <div class="tip-text"><strong>Graph View magic:</strong> Sau khi tạo nhiều liên kết, nhấn <strong>Ctrl+G</strong> để thấy bản đồ kết nối của toàn bộ dự án — cực kỳ ấn tượng khi thuyết trình với mentor!</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(4)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-card" id="step-5">
+    <div class="step-header" onclick="toggleStep(5)">
+      <div class="step-num">5</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 5 · Templates</div>
+        <div class="step-title">Tạo Templates cho mọi loại tài liệu</div>
+      </div>
+      <button class="step-toggle" id="toggle-5">▾</button>
+    </div>
+    <div class="step-body" id="body-5">
+      <p class="intro-text">Templates giúp mỗi lần tạo tài liệu mới đều đúng format, tiết kiệm thời gian và đồng nhất cho cả team.</p>
+
+      <p style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)">Bật Core Plugin Templates:</p>
+      <ul class="task-list" id="tasks-5a">
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Vào <strong>Settings → Core plugins → Templates</strong> → bật ON</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Tạo folder <code style="font-family:monospace;color:#a6e3a1">_Templates/</code> trong vault</div>
+        </li>
+        <li class="task-item" onclick="toggleTask(this)">
+          <div class="task-check">✓</div>
+          <div class="task-text">Trong Settings → Templates → chỉ đường dẫn đến folder <code style="font-family:monospace;color:#a6e3a1">_Templates</code></div>
+        </li>
+      </ul>
+
+      <p style="font-size:14px;font-weight:700;margin:20px 0 12px;color:var(--text)">Template: Biên bản họp (Meeting Note)</p>
+      <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="tag">---</span>
+<span class="value">date</span>: {{date}}
+<span class="value">attendees</span>: 
+<span class="value">type</span>: meeting
+<span class="tag">---</span>
+
+<span class="comment"># Meeting: {{title}}</span>
+
+<span class="comment">## 🎯 Mục tiêu cuộc họp</span>
+- 
+
+<span class="comment">## 💬 Nội dung thảo luận</span>
+- 
+
+<span class="comment">## ✅ Action Items</span>
+- [ ] Người thực hiện: | Deadline: 
+- [ ] Người thực hiện: | Deadline: 
+
+<span class="comment">## 📎 Tài liệu liên quan</span>
+- [[]]
+
+<span class="link">#meeting #{{date:YYYY-MM}}</span>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin:20px 0 12px;color:var(--text)">Template: Phỏng vấn người dùng</p>
+      <div class="code-block">
+<span class="tag">---</span>
+<span class="value">date</span>: {{date}}
+<span class="value">interviewee</span>: 
+<span class="value">segment</span>: 
+<span class="tag">---</span>
+
+<span class="comment"># User Interview — {{date}}</span>
+
+<span class="comment">## 👤 Thông tin người dùng</span>
+- Tuổi / Nghề nghiệp: 
+- Segment: 
+
+<span class="comment">## 🔥 Pain Points phát hiện</span>
+- 
+
+<span class="comment">## 💡 Insights quan trọng</span>
+- 
+
+<span class="comment">## 📊 Quote đáng nhớ</span>
+> "..."
+
+<span class="link">#user-research #interview</span>
+      </div>
+
+      <div class="tip-box info">
+        <div class="tip-icon">⚡</div>
+        <div class="tip-text"><strong>Dùng template:</strong> Tạo file mới → Ctrl+P → gõ "Insert template" → chọn template. Hoặc dùng hotkey tùy chỉnh trong Settings.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(5)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-card" id="step-6">
+    <div class="step-header" onclick="toggleStep(6)">
+      <div class="step-num">6</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 6 · Plugins</div>
+        <div class="step-title">Cài Community Plugins thiết yếu</div>
+      </div>
+      <button class="step-toggle" id="toggle-6">▾</button>
+    </div>
+    <div class="step-body" id="body-6">
+      <p class="intro-text">Obsidian có marketplace plugin mạnh mẽ. Đây là 5 plugin không thể thiếu cho startup — tất cả đều miễn phí.</p>
+
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
+        <div class="mini-card" style="border-left:3px solid var(--accent)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">📅</span>
+            <span class="mini-card-title">Dataview</span>
+            <span style="font-size:11px;color:var(--accent);background:rgba(124,106,247,.15);padding:2px 8px;border-radius:4px;margin-left:auto">Quan trọng nhất</span>
+          </div>
+          <div class="mini-card-desc">Query dữ liệu từ ghi chú như SQL. VD: liệt kê tất cả Action Items chưa xong trong mọi cuộc họp.</div>
+        </div>
+        <div class="mini-card" style="border-left:3px solid var(--accent2)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">📋</span>
+            <span class="mini-card-title">Kanban</span>
+          </div>
+          <div class="mini-card-desc">Tạo bảng Kanban (To Do / Doing / Done) ngay trong Obsidian — quản lý sprint của team.</div>
+        </div>
+        <div class="mini-card" style="border-left:3px solid var(--accent3)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">📆</span>
+            <span class="mini-card-title">Calendar + Daily Notes</span>
+          </div>
+          <div class="mini-card-desc">Ghi chú hằng ngày (daily log), liên kết với lịch — theo dõi tiến độ startup từng ngày.</div>
+        </div>
+        <div class="mini-card" style="border-left:3px solid #f38ba8">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">🎨</span>
+            <span class="mini-card-title">Excalidraw</span>
+          </div>
+          <div class="mini-card-desc">Vẽ sơ đồ, flowchart, wireframe ngay trong Obsidian. Cực hữu ích khi brainstorm cùng team.</div>
+        </div>
+        <div class="mini-card" style="border-left:3px solid #89dceb">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">🤖</span>
+            <span class="mini-card-title">Copilot (AI)</span>
+          </div>
+          <div class="mini-card-desc">Tích hợp AI vào Obsidian — tóm tắt, phân tích ghi chú, brainstorm ý tưởng mới.</div>
+        </div>
+      </div>
+
+      <div class="tip-box info">
+        <div class="tip-icon">🔧</div>
+        <div class="tip-text"><strong>Cách cài:</strong> Settings → Community plugins → Turn off Safe mode → Browse → tìm tên plugin → Install → Enable.</div>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin:20px 0 12px;color:var(--text)">Ví dụ Dataview query thực tế:</p>
+      <div class="code-block">
+<span class="comment">```dataview</span>
+<span class="tag">TASK</span>
+<span class="value">WHERE</span> !completed
+<span class="value">AND</span> contains(tags, <span class="link">"#meeting"</span>)
+<span class="value">SORT</span> file.mtime DESC
+<span class="comment">```</span>
+<span class="desc">← Liệt kê TẤT CẢ action items chưa xong từ mọi cuộc họp</span>
+      </div>
+
+      <button class="done-btn" onclick="markDone(6)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step-card" id="step-7">
+    <div class="step-header" onclick="toggleStep(7)">
+      <div class="step-num">7</div>
+      <div class="step-title-wrap">
+        <div class="step-tag">Bước 7 · Workflow</div>
+        <div class="step-title">Thiết lập quy trình làm việc cho cả Team</div>
+      </div>
+      <button class="step-toggle" id="toggle-7">▾</button>
+    </div>
+    <div class="step-body" id="body-7">
+      <p class="intro-text">Obsidian cá nhân thì tốt, nhưng dùng chung với team mới thực sự mạnh. Đây là workflow đề xuất cho startup 2–5 người.</p>
+
+      <p style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)">Quy trình hằng ngày (Daily Workflow):</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:var(--surface2);border-radius:var(--radius-sm)">
+          <div style="background:var(--accent);color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">Sáng</div>
+          <div style="font-size:14px;color:var(--text-soft);line-height:1.7">Mở Daily Note (Ctrl+Shift+D) → ghi 3 mục tiêu hôm nay → link đến task liên quan</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:var(--surface2);border-radius:var(--radius-sm)">
+          <div style="background:var(--accent2);color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">Trưa</div>
+          <div style="font-size:14px;color:var(--text-soft);line-height:1.7">Cập nhật Kanban board → tick task xong → ghi lại blockers</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:var(--surface2);border-radius:var(--radius-sm)">
+          <div style="background:var(--accent3);color:#000;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">Tối</div>
+          <div style="font-size:14px;color:var(--text-soft);line-height:1.7">Quick retrospective 5 phút trong Daily Note → "Học được gì hôm nay?" → capture ý tưởng mới vào Inbox</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)">Chia sẻ Vault với Team — 3 cách:</p>
+      <div class="grid-2">
+        <div class="mini-card">
+          <div class="mini-card-icon">☁️</div>
+          <div class="mini-card-title">Google Drive / OneDrive</div>
+          <div class="mini-card-desc">Miễn phí, đơn giản nhất. Để vault trong shared folder. Chú ý: không nên mở cùng lúc một file.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🐙</div>
+          <div class="mini-card-title">GitHub (Git plugin)</div>
+          <div class="mini-card-desc">Mạnh nhất — version control đầy đủ, xem history thay đổi, resolve conflict. Phù hợp team technical.</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;font-weight:700;margin:20px 0 12px;color:var(--text)">Phím tắt quan trọng cần nhớ:</p>
+      <div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Tạo ghi chú mới</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>N</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Mở file nhanh</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>O</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Command palette</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>P</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Xem Graph</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>G</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Daily Note hôm nay</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>D</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Toggle Edit / Preview</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>E</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Tìm kiếm toàn vault</span>
+          <div class="kbd-group"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>F</kbd></div>
+        </div>
+      </div>
+
+      <div class="tip-box success">
+        <div class="tip-icon">🚀</div>
+        <div class="tip-text"><strong>Pro tip cuối:</strong> Tạo file <strong>🏠 Home.md</strong> làm dashboard — embed Dataview queries để xem tất cả tasks đang mở, meetings gần nhất, và ý tưởng chưa validate — ngay khi mở vault mỗi sáng.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(7)">✓ Hoàn thành bước này</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Hướng dẫn tổng hợp bởi Chuyên gia · Tài liệu chính thức tại <a href="https://obsidian.md" target="_blank">obsidian.md</a> &amp; <a href="https://help.obsidian.md" target="_blank">help.obsidian.md</a>
+</div>
+
+<script>
+  const totalSteps = 7;
+  let completedSteps = new Set();
+
+  function toggleStep(n) {
+    const body = document.getElementById('body-' + n);
+    const toggle = document.getElementById('toggle-' + n);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    toggle.classList.toggle('open', !isOpen);
+  }
+
+  function toggleTask(el) {
+    el.classList.toggle('checked');
+  }
+
+  function markDone(n) {
+    const card = document.getElementById('step-' + n);
+    const btn = card.querySelector('.done-btn');
+    const isDone = completedSteps.has(n);
+
+    if (isDone) {
+      completedSteps.delete(n);
+      card.classList.remove('done');
+      card.classList.add('active');
+      btn.classList.remove('undone');
+      btn.textContent = '✓ Hoàn thành bước này';
+    } else {
+      completedSteps.add(n);
+      card.classList.add('done');
+      card.classList.remove('active');
+      btn.classList.add('undone');
+      btn.textContent = '↩ Đánh dấu chưa xong';
+      // Auto open next step
+      if (n < totalSteps) {
+        const nextCard = document.getElementById('step-' + (n+1));
+        const nextBody = document.getElementById('body-' + (n+1));
+        const nextToggle = document.getElementById('toggle-' + (n+1));
+        nextCard.classList.add('active');
+        nextBody.classList.add('open');
+        nextToggle.classList.add('open');
+        setTimeout(() => nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      }
+    }
+
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const count = completedSteps.size;
+    const pct = (count / totalSteps) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = count + ' / ' + totalSteps + ' bước';
+    const banner = document.getElementById('congratsBanner');
+    if (count === totalSteps) {
+      banner.classList.add('show');
+      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  function copyCode(btn) {
+    const block = btn.closest('.code-block');
+    const text = block.innerText.replace('Copy\n', '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+</script>
+</body>
+</html>
